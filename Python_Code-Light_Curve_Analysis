@@ -1,0 +1,168 @@
+DISSERTATION PYCHARM
+
+WITH NESTED LOOP
+
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+
+z, t, flux = np.loadtxt('KIC006922244.tbl', unpack=True, skiprows=3)   # creating the plot for the light curve
+
+P = 3.5224
+
+t2 = np.empty(len(t))    # create new array t2 which is empty
+
+flux1 = np.empty(len(flux))   # create new array flux1 which is empty
+
+for i in range(0, len(t)):
+
+    t[i] = t[i]-(131.705-P/2.)
+    t2[i] = t[i] % P - P/2.
+
+t3, flux = zip(*sorted(zip(t2, flux)))
+
+# creating the piecewise function:
+
+ingress_s_t = -0.069719     # here i am setting up parameters
+ingress_e_t = -0.0259495    # for the ingress and egress times/positions
+egress_e_t = 0.0702584
+egress_s_t = 0.0264428
+
+egress_s_y = -0.00912595
+egress_e_y = 0
+ingress_e_y = -0.00912595
+ingress_s_y = 0
+
+gradient = (ingress_s_y - ingress_e_y) / (ingress_e_t - ingress_s_t)
+SmallestChiSquared = 1.58
+
+ZeroDepth = 0
+DeltaZeroDepth = 0.005
+ZeroDepthList = [ZeroDepth + 5 * DeltaZeroDepth, ZeroDepth + 4 * DeltaZeroDepth, ZeroDepth + 3 * DeltaZeroDepth,\
+                 ZeroDepth + 2 * DeltaZeroDepth, ZeroDepth + 1 * DeltaZeroDepth, ZeroDepth,\
+                 ZeroDepth - 1 * DeltaZeroDepth, ZeroDepth - 2 * DeltaZeroDepth, ZeroDepth - 3 * DeltaZeroDepth,\
+                 ZeroDepth - 4 * DeltaZeroDepth, ZeroDepth - 5 * DeltaZeroDepth]
+MidDepth = -0.00912595
+DeltaDepth = 0.005 * MidDepth
+DepthList = [MidDepth + 5 * DeltaDepth, MidDepth + 4 * DeltaDepth, MidDepth + 3 * DeltaDepth,\
+             MidDepth + 2 * DeltaDepth, MidDepth + 1 * DeltaDepth, MidDepth, MidDepth - 1 * DeltaDepth,\
+             MidDepth - 2 * DeltaDepth, MidDepth - 3 * DeltaDepth, MidDepth - 4 * DeltaDepth,\
+             MidDepth - 5 * DeltaDepth]
+
+IngressEndTime = -0.0259495
+DeltaTime2 = 0.005 * IngressEndTime
+TimeList2 = [IngressEndTime + 5 * DeltaTime2, IngressEndTime + 4 * DeltaTime2, IngressEndTime + 3 * DeltaTime2,\
+             IngressEndTime + 2 * DeltaTime2, IngressEndTime + 1 * DeltaTime2, IngressEndTime,\
+             IngressEndTime - 1 * DeltaTime2, IngressEndTime - 2 * DeltaTime2, IngressEndTime - 3 * DeltaTime2,\
+             IngressEndTime - 4 * DeltaTime2, IngressEndTime - 5 * DeltaTime2]
+
+PreTransitTime = -0.069719
+DeltaTime = 0.005 * PreTransitTime
+TimeList = [PreTransitTime + 5 * DeltaTime, PreTransitTime + 4 * DeltaTime, PreTransitTime + 3 * DeltaTime,\
+            PreTransitTime + 2 * DeltaTime, PreTransitTime + 1 * DeltaTime, PreTransitTime,\
+            PreTransitTime - 1 * DeltaTime, PreTransitTime - 2 * DeltaTime, PreTransitTime - 3 * DeltaTime,\
+            PreTransitTime - 4 * DeltaTime, PreTransitTime - 5 * DeltaTime]
+#gradient = (ingress_s_y - ingress_e_y) / (ingress_e_t - ingress_s_t)
+m = 0
+mcounter = 0
+# do 3 loops, t ingress time, then flux and time for tingress end, then mirror them, alsohave the the first line done.
+
+for m in range(0, len(TimeList2)):
+    mcounter += 1
+    ingress_e_t = TimeList2[m]
+    egress_s_t = TimeList2[m]
+    ModelFlux = np.empty(len(flux))
+    #gradient = (ingress_s_y - ingress_e_y)/(ingress_e_t - ingress_s_t)
+    for l in range(0, len(TimeList)):
+        ingress_s_t = TimeList[l]
+        egress_e_t = -TimeList[l]
+        #ModelFlux = np.empty(len(flux))
+        #gradient = (ingress_s_y - ingress_e_y)/(ingress_e_t - ingress_s_t)
+        for j in range(0, len(DepthList)):
+            egress_s_y = DepthList[j]
+            ingress_e_y = DepthList[j]
+            #ModelFlux = np.empty(len(flux))     # creating a new array ModelFlux which is empty
+            #gradient = (ingress_s_y - ingress_e_y)/(ingress_e_t - ingress_s_t)  # finding the gradient
+            for k in range(0, len(ZeroDepthList)):
+                ingress_s_y = ZeroDepthList[k]
+                egress_e_y = ZeroDepthList[k]
+                # ModelFlux = np.empty(len(flux))
+                #gradient = (ingress_s_y - ingress_e_y) / (ingress_e_t - ingress_s_t)
+                for i in range(0, len(flux)):   # now creating the model for the piecewise
+                                #  creating if statements for the specified regions
+                    if t3[i] <= ingress_s_t:    # and assigning values of flux for these time periods
+                        ModelFlux[i] = 0
+                    if t3[i] >= egress_e_t:
+                        ModelFlux[i] = 0
+                    if ingress_s_t <= t3[i] <= ingress_e_t:
+                        ModelFlux[i] = -(ingress_s_y + gradient * (t3[i] - ingress_s_t))
+                    if ingress_e_t <= t3[i] <= egress_s_t:
+                        ModelFlux[i] = egress_s_y
+                    if egress_s_t <= t3[i] <= egress_e_t:
+                        ModelFlux[i] = (egress_s_y + gradient * (t3[i] - egress_s_t))
+
+                plt.plot(t3, flux, 'b.')
+                plt.plot(t3, ModelFlux, 'r.', markersize=2.0)
+                plt.show()
+                FluxMean = icounter = icounter2 = icounter3 = var = FluxDiff = 0.0  # assigning values of 0 to all these names
+# so that I can sum over the loop over all values starting from 0
+
+                for i in range(0, len(flux)):   # now doing a loop to calculate the mean flux in order to calculate variance
+                    FluxMean = FluxMean + flux[i]
+                    icounter = icounter + 1
+                FluxMean = FluxMean / icounter
+
+                for i in range(0, len(flux)):       # another summation loop to calculate the variance
+                    if t3[i] <= ingress_s_t:
+                        icounter3 = icounter3 + 1           # variance is difference of data from mean, at each point up until the
+                        var = var + (flux[i] - FluxMean)**2     # ingress start time in this case
+                Variance = var/icounter3     # dividing by icounter3, as per the equation for chi squared
+
+                for i in range(0, len(flux)):       # final loop to calculate the difference between our data
+                    FluxDiff = FluxDiff + (flux[i] - ModelFlux[i])**2       # and the model I created
+                    icounter2 = icounter2 + 1
+                FluxDifference = FluxDiff/icounter2
+
+                ChiSquared = FluxDifference/Variance    # performing the last calculation for chi squared, as per equation in guide
+                #if ChiSquared < SmallestChiSquared:
+                    #SmallestChiSquared = ChiSquared
+                    #best_ingress_start = ingress
+                    #best_ingress_end =
+                    #best_depth =
+                print 'Chi Squared =', ChiSquared     # essentially data flux - model flux, all divided by variance, and print Chi^2
+
+                G = 6.67e-8     # VALUES OF SYMBOLS AND CONSTANTS
+                pi = 3.141592653594
+                TimePeriod = P*24.*60*60.
+                g = 10**4.169
+                StarRadius = 1.009182108e+11
+                StarRadiusSquared = StarRadius**2
+                FluxDelta = 0.00912592
+                EarthRadius = 6.371e+8
+
+                StarMass = (g * StarRadiusSquared)/G     # calculation for semimajor axis
+                SemiMajor = ((TimePeriod**2 * G * StarMass)/(pi**2 * 4))**(1./3)     # semimajor in cm
+                AU = 1.496e+13
+                SemiMajorAxisAU = SemiMajor/AU       # gives semimajor axis in AU]
+                Tdur = (egress_e_t - ingress_s_t)*60*24*60     # Time of transit duration
+                PlanetRadius = StarRadius*math.sqrt(FluxDelta)   # calculation for planet radius
+                Rp = PlanetRadius/EarthRadius
+
+# calculation for transit impact parameter:
+                b = math.sqrt((StarRadius + PlanetRadius)**2 - (SemiMajor*math.sin((Tdur*pi)/TimePeriod))**2)/StarRadius
+
+                i = math.acos((b * StarRadius)/SemiMajor)   # calculation for inclination
+                Inclination = i * 57.2958   # converting inclination to degrees
+
+
+print j, j, 'Planet Radius =', Rp, 'Earth Radii'
+print 'Orbital Period =', P, 'days'
+print 'Semi-major Axis =', SemiMajorAxisAU, 'AU'
+print 'Transit Impact Parameter =', b, 'Stellar Radii'
+print 'Inclination =', Inclination, 'degrees'
+print 'MinChiFinish'
+plt.plot(t3, flux, 'b.')
+plt.plot(t3, ModelFlux, 'r.', markersize=2.0)
+plt.show()
+
+
