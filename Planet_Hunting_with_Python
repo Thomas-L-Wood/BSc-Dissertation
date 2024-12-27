@@ -1,0 +1,501 @@
+\documentclass[a4paper,12pt,
+bibliography=totoc]{article}
+
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage[font=scriptsize]{caption}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+\usepackage{siunitx}
+\usepackage{float}
+\usepackage{gensymb}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+
+
+
+\pagenumbering{arabic}
+\setlength{\parskip}{1em}
+\bibliographystyle{abbrvnat}
+\title{\textbf{Planet Hunting with Python}}
+
+\vspace{2cm}
+\author{Thomas Wood (150261443)}
+\date{27 February 2019}
+
+\vspace{2cm}
+\text{Supervisor:wisgbirbug}
+\text{SPA6776 Extend ind proj}
+\text{30 Credit Units}
+
+\newpage
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+In this project I will analyse light curves that have been downloaded from the Kepler
+spacecraft in order to gain information and hopefully characterise exoplanets. This will be
+done by writing programmes in Python that will interpret data using simplified algorithms and
+show us graphically the light received by Kepler spacecraft over various time periods. I can
+expect to use the Python program to draw conclusions about the observed population of
+exoplanets as well as key physical parameters such as orbital periods, orbital inclination to
+the line of sight, semi-major axes as well as the physical radii of the exoplanets. On top of
+this I hope to be able to model the light curves produced and work on improving these
+models to optimise the quality and accuracy of them. Finally, I will be carrying out Chisquared tests to work out an error estimate for the models I create and carry out steps in
+reducing this value as much as I can.
+
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+
+\section{Introduction}
+
+\subsection{Prologue}
+With the rise in number of confirmed extrasolar planets brings forth new questions into the world outside the solar system. Discoveries of new exoplanets with interesting parameters such as Kepler 425 b which has a planetary radii of $0.978 \pm 0.022$ has spurred us into posing a question on what exoplanets are made of and what can we learn about planetary composition from a planets radius and its mass. Another discovery, GJ 436b has a Neptune-like mass and radius (Mp = $22.6 \pm 1.9$ Mearth and Rp = $3.95 \pm 0.35$ Rearth) that was found transiting a star (Gillon et al. 2007). Hence with the information provided by the Kepler mission we aim to analyse exoplanets and examine the physical properties to determine if there is a relationship between mass and radius.
+
+We explored a wide range of exoplanets, ranging from 2-15 Earth radii, by analysing their light curves using code in Python to discover its key characteristics such as mass, semi-major axis, orbital period and inclination. We will continue on from work by Seager et al. (2007), using realistic planetery materials to model planets and use in our Mass-Radius diagrams but with the added bonus of using data made available to us from the Kepler mission. We will use utilise some of the foundation of this topic from the work of Zapolsky and Salpeter (1969), the computation of mass-radius relationships for homogeneous zero-temperature planets, since our assumptions will mean our models for planets will be very simple in structure. We are purely interested in the planets parameters and as such, we will also be ignoring temperature and other factors that may affect radius.
+
+While other works have a specific criteria for exoplanetary analysis, we aim to complement the work of others by providing a broad range of planets for analysis and aiming to analyse their composition and demonstrating the effectiveness of light curve analysis using Python.
+%\subsection{Ideas for sections}
+%Firstly I will talk about when planet detection started and the history behind it. How the kepler mission changed things and what it gave us.
+%When it left Earth and in what form was the data sent back, i.e. luminosity?
+%This will explain the Kepler missions, what data was collected and how I will use that data to find information about planets.
+%Will also explain how I coded using python to scan light curves and what everything means in regards to graphs produced.
+
+\subsection{History of Extrasolar Planets}
+The first recognised detection of an extrasolar planet occured in 1988 and with it brought a wave of newfound interest into what was outside of our own solar system. Soon after the discovery was first made the number of detected planets has been steadily increasing, with new technologies and techniques being used to increase the accuracy and number of detections made. At the time of writing this number stood at 3891. The methods used most commonly are the Radial Velocity method, Transit Method, Imaging and Microlensing. However in the past decade the primary method with which exoplanets are detected has changed, with the Transit method now being the leading method of finding exoplanets.
+\begin{figure}[h!]
+\centering
+%\label{graph1}
+%\begin{adjustbox}{width=\textwidth}
+\includegraphics[width=\linewidth]{Image1}
+\caption{Graph depicting number of dectected exoplanets using different methods since 1989. Note: Transit method sudden surge in number of detections in the past 10 years.}
+\label{fig:1}
+%\end{adjustbox}
+\end{figure}
+
+\newpage
+
+\subsection{The Kepler Mission}
+The data analysed was primarily from the Kepler mission which was launched in March 6, 2009 and monitored the brightness of approximately 150,000 stars over the course of the mission. This is of course the Transit method and is achieved by looking at the periodic dimming that occurs when a planet passes in front of its host star. This can be be seen below (see Fig.1) as viewed from the perspective of an observer on Earth. One can conclude then that this event, a planet being seen passing in front of a star, is quite rare and this is definitely the case and is one of the drawbacks of the Transit method. Another problem is that there are other astronomical events that can mimic the effects of a transiting star such as binary systems[1] so often add itional methods are required to confirm the validity of a planet.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\linewidth]{Image2}
+\caption{This diagram demonstrates the physical workings of the transift method. When an orbiting planet passes in front of its host star, a proportion of its light is blocked out according to the size of the planet. Therefore one uses this periodic dimming of light from a star in order to indicate whether a planet has been detected.}
+\label{fig:2}
+\end{figure}
+
+\subsubsection{Light Curves}
+The Kepler spacecraft supplied the astrophysics community with large volumes of data which included the time of observation and corresponding bright ess of the star over a period of time. This can then be read and plotted as light curves which can be used to find out information about the planets via the methods described later in this article. Before one can discern anything useful from the light curves they were first edited by the Kepler team by the removal of artefacts and other outliers (by a process known as detrending). These detrended light curves now being able to be analysed for their respective planets parameters all we needed to do was undertake a phase folding so that we can find out important features of the light curves, such as ingress and egress times.
+
+\subsubsection{How the Kepler Team finds Transits}
+
+\section{Methods}
+\subsection{Phase Folding Light Curves}
+\label{sec1}
+With the detrended light curves we needed to write a program that would phase fold a light curve. Firstly we plotted the data in Python using the time and flux values in the Kepler files, by storing them in an array seen on line 5 in \ref{fig:3} below. We first found the period of the planet using a graph of flux against time as seen in lines 5-9 in Fig. 3 below. We achieved this by marking the transit points of the 1st and 10th transit, and working out the distance between them using the graphing tool.
+
+Below is a diagram that illustrates how the period was found:
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.75\linewidth]{ImageXXx}
+\caption{Detrended light curve of Kepler-39. Note x-axis denotes time period, so take periodic data points to work out the period.}
+\label{fig:3}
+\end{figure}
+
+In the diagram there are blue markers which denote points in time at which the planet is transiting across its host star. In most cases 10 repeating were selected and the distance between points 1 and 10 were calculated and divided by 9. This gives the average period and was used to plot the phase folded light curve as seen in \ref{fig:3}.
+
+With the Period now obtained we needed to complete the phase folding and so first we created new, empty arrays for flux and time so that we can modify the original arrays. Phase folding is just the shifting of the data points so that they overlap and so that's what we did. In lines 17-18 we have subtracted the time of the 1st transit by half a period, for every value in the array, and this shifts the data. Then in line 18 we have used the modulus function in Python, denoted by the \% sign. This is dividing the periodic "dips" in brightness by the time array so that they sit on top of each other, as the modulo function (\%) will give us the remainder which is what we want. We have again subtracted by half a period in order to make sure our phase folded light curve will sit on 0.0 days, to give us a negative ingress time and a positive egress time, for simpler calculations.
+
+Note that the quality of phase-folding is extremely sensitive to the period and so the period was taken to 4 decimal places. The figure below demonstrates the effect of altering the period by just $\pm 0.0005$:
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\linewidth]{ImageXX}
+\caption{Light curve from \ref{fig:notsure}, with $P = P + 0.005$.}
+\label{fig:notsurenotsure}
+\end{figure}
+
+There is also the case of when data is missing from the detrended light curve. This can be due to a few reasons however it is likely the case that this was when the Kepler spacecraft was refuelling or sending data back to Earth. This is why it was mentioned previously in this section that 10 transits are used in most cases. For some light curves this is not possible as there are gaps in the data that prevent this. The reason 10 is used is that it provides a good estimate for the period, but other numbers of transits can be used, which in the figure below, Kepler-96 this had to be done to calculate its period of 16.2385.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\linewidth]{ImageXXXX}
+\caption{Kepler-96 before phase-folding. Note gaps in data at \textasciitilde 725 and 810 days.}
+\label{fig:notesutuhergheur}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\linewidth]{Image3}
+\caption{Code in Python for phase folding the light curve for the "Kepler 96" system. Note lines 17-18.}
+\label{fig:3}
+\end{figure}
+
+This led us to produce the phase folded light curve as seen in Fig. 4 below. This is the system KIC006922244 and from it we can compute relatively basic mathematics in order to extract information about orbiting planet's parameters.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\linewidth]{Image4}
+\caption{Code in Python for phase folding the light curve for the "Kepler 96" system. Note lines 17-18.}
+\label{fig:4}
+\end{figure}
+
+\subsection{Obtaining Parameters}
+The first noticeable feature of Fig. 4 is the large "dip" otherwise known as depth of the transit, corresponding to feature 3 in Fig. \ref{fig:2} on page \pageref{fig:2}. The depth of the transit is also known as the midpoint of transit and can be used to determine the radius of the star, since the amount of light blocked out by the orbiting planet, is affeced by the size of the planet, according to the following equation:
+
+\begin{equation}\label{eq:1}
+Depth = \left(\frac{R_p}{R_s}\right)^2
+\end{equation}
+
+From this we can rearrange so that the planet's radius can be found using the following formula:
+
+\begin{equation}\label{eq:2}
+R_p = R_s\sqrt{Depth}
+\end{equation}
+
+Where R\textsubscript{p} is the radius of the orbiting planet and R\textsubscript{s} is the radius of the star it is orbiting, so we can see that the radius of an orbiting plan is proportional to the radius of the star multiplied by the square root of the depth. We can see that measuring the transit depth is not enough and we need to know the size of the star that it is orbiting. This information is was extracted from the NASA Exoplanet Archive website and will be used in later code for other parameters.
+
+The orbital period was another parameter of the planet and this was previously mentioned in section \ref{sec1}, and according to astronomical convention the unit is Julian Days. One thing to note is that as the period is used to phase fold the light curves it must be the first parameter to be worked out, and as such the rest of the parameters will rely heavily on the accuracy of this parameter in particular. The process of calculating the orbital period wasn't fully illustrated so below shows a figure showing periodic transit points.
+
+The next parameter obtained was the semi-major axis. This parameter is defined as the mean distance between the planet and star during its orbit. An assumption we have used is that the planet's orbit will be considered circular, since taking into account elliptical orbits would be too complicated and unnecessary for the purpose of this project. To obtain an expression for the semi-major axis of the orbit we equate the gravitational force to the centrifugal force associated with this circular motion as the following:
+
+\begin{equation}\label{eq:3}
+\left(\frac{GM_sM_p}{a^2}\right) = \left(\frac{M_pv^2}{a}\right)
+\end{equation}
+
+Where G is the gravtiational constant, M\textsubscript{p} and M\textsubscript{s} are the masses of the orbiting planet and its host star, respectively, and finally \textit{v} denotes the velocity of the circular orbit. To solve for \textit{a} (semi-major axis) one needs to consider the relation between velocity, \textit{v}, and the angular velocity $\omega$, for a circular orbit as shown below:
+\begin{equation*}
+v = a \omega
+\end{equation*}
+
+As well as the expression that relates orbital period, \textit{P}, to its angular velocity, $\omega$:
+\begin{equation*}
+P = \left(\frac{2\pi}{\omega}\right)
+\end{equation*}
+
+We can use these equations to give us the velocity in terms of the planets radius, or its semi-major axis, and its period:
+
+\begin{equation}\label{eq:4}
+v = \left(\frac{2\pi a}{P}\right)
+\end{equation}
+One more equation that will be needed is an equation for gravitational acceleration, \textit{g}, at the surface of the star (expressed in units of cm s\textsuperscript{-2}):
+
+\begin{equation*}
+g = \left(\frac{GM_s}{R_s^2}\right)
+\end{equation*}
+
+Rearranged in the form:
+
+\begin{equation}\label{eq:5}
+M_s = \left(\frac{gR_s^2}{G}\right)
+\end{equation}
+
+Using the Kepler data archive we can substitute for values in Eq. \ref{eq:5} to get the mass of the star. With this, all that's required is to substitute Eq. \ref{eq:4} into Eq. \ref{eq:3}, and rearrange for \textit{a} which finally yields:
+
+\begin{equation}\label{eq:6}
+a = \left(\frac{M_sP^2G}{4\pi^2}\right)^\frac{1}{3}
+\end{equation}
+
+The transit impact parameter, known as \textit{b}, which is defined as the sky-projected distance between the centre of the stellar disc and the centre of the planetary disc at conjunction. Note that the angle \textit{i} is referred to as the inclination of the orbit and the calculation for this will be described later in this section. An angle of $\textit{i} = 90\degree$ corresponds to a planet that passes across the centre of the stellar disc, therefore one should not expect \textit{i} to be greater than this. The geometry of how \textit{b} is calculated can be seen in Fig. \ref{fig:5} below and shows a front view of an orbiting planet passing its host star during a transit. It demonstrates the trigonomic relationship shown above, as the length of the chord as described by the path of the planet can be calculated using Pythagoras' theorem.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.75\linewidth]{Image5}
+\caption{Front view as seen by an observer of the path of an exoplanet passing in front of its host star during a transit.}
+\label{fig:5}
+\end{figure}
+
+The length of this chord can therefore be solved mathematically and is the equation below:
+
+\begin{equation*}
+2l = 2\sqrt{(R_s + R_p)^2 - (bR_s)^2}
+\end{equation*}
+
+The diagram seen below shows in three dimensions the view of the geometry of the orbit on a transiting planet.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.9\linewidth]{Image6}
+\caption{3-dimensional view of the geometry of a transiting exoplanet. Note i is $90\degree$ subtracted from the angle between the observer and the orbiting planet.}
+\label{fig:6}
+\end{figure}
+
+Our assumption, as before with previous parameters, is that it is a circular orbit and we can express the impact parameter as:
+% reference is https://www.paulanthonywilson.com/exoplanets/exoplanet-detection-techniques/the-exoplanet-transit-method/
+\begin{equation}\label{eq:7}
+b = \left(\frac{a\cos(i)}{R_s}\right)
+\end{equation}
+
+With the equation for the transit duration we needed to find the points in time at egress end and ingress start and this was done using the same method as with the period. So using a cursor to mark the points of interest in Fig. \ref{fig:4} on page \pageref{fig:4} and reading off the time from the x-axis. However since in our graph the units are in Julian days and in our equations we are using seconds so before calculations were made we converted our units. With all the variables now calculated, we rearranged the above equation for the transit impact parameter to produce:
+
+\begin{equation}\label{eq:8}
+b = \frac{\sqrt{\left({R_s + R_p}\right)^2 - \left(a\sin\left(\frac{T_{dur}\pi}{P}\right)\right)}}{R_s}
+\end{equation}
+
+Finally the last parameter we calculated was the inclination of the orbiting planet. This can be done by rearranging Eq. \ref{eq:7} on page \pageref{eq:7} to the following:
+
+\begin{equation}\label{eq:9}
+i = \sqrt{\left(\frac{bR_s}{a}\right)}
+\end{equation}
+
+We now have concluded the procedure for determining an exoplanets parameters. We have enough information to obtain the planet radius, the orbital period, the semi-major axis, the impact parameter and the inclination from light curve analysis. These can be found described in Eq. \ref{eq:2}, Figure \ref{fig:5}, Eq. \ref{eq:6}, Eq. \ref{eq:7} and Eq. \ref{eq:9} respectively. There will be variation within the data set, and some with a smaller depth as described by Eq. \ref{eq:1} on page \pageref{eq:1} may require some special care due to the increased difficulty in determining the true flux and hence the radius of the planet. This should not be a problem however as will be discussed in section \ref{sec2} on page \pageref{sec2} due to the stipulations in the data chosen for this analysis.
+
+Another thing to note is that all the of the variables in the equations are either sourced from the NASA exoplanet archive, or are known as universal constants, or in the case of parameters such as length of transit duration etc. they are found by analysing phase folded light curves.
+%Coding in Python was used to plot light curve data from Kepler and produced graphs as seen below. The progress of the planet across the star can then be split up into sections and expressed as the ingress (the point in time at which the planet reaches the edge of the star) and the egress (the time at which the planet "exits" the star and has completed a full transit).
+
+\subsection{Chi-squared Test}
+
+A chi-squared test, known commonly by the symbol \( \chi \)\textsuperscript{2}, is a statistical test that is used to determine whether there is a significant difference between the expected and the observed values in a set of data. Simply put it is a measure of "goodness of fit", which in the case of this project, demonstrates how well a constructed model correlates to the light curves found in Fig. \ref{fig:4}.
+
+Before one can perform a chi-squared test a model must be produced so that there is a comparison to be made. This involved using a piece-wise function that fitted to the data, starting at ending at the parameters as used in section \ref{sec1}. We assumed that the transit was symmetric about the midpoint so that we could produce a model that started from outside the transit, went up the the time of the start of ingress, to the end of the time of ingress and then finished at the depth of the transit. With this the function could be reflected across the midpoint of the transit so that the full transit was covered by the model fit. The model was plotted on top of the data by using consecutive plt.plot commands seen in the figure below:
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.75\linewidth]{Image7}
+\caption{See lines 24 and 54 for plotting commands that are used to plot the data and model fits respectively. Data uses blue markers, and model fit uses red, denoted as 'b' and 'r' respectively, in Python.}
+\label{fig:7}
+\end{figure}
+
+As we can see in Fig. \ref{fig:7} above the model was created by separating the data into sub-sections and "drawing" straight lines between the points of the transit. This can be seen in lines 41-52. Before the ingress start time, and after the egress end time, the values of flux are 0, and between the start and end of transit, and the depth of the transit a gradient was calculated since it is not a perfectly vertical line. So these parts of the model were calculated and the reverse of these were used, as seen in lines 51-52 so that the model will be symmetric.
+
+As seen previously in section \ref{sec1} an array was used to store the values of flux, which correspond to each time value for each point in the data. This was the same for the model which means that for every point in the Kepler data, there is a corresponding model value in its own array. This is why we can perform the chi-squared test, and in the calculation for chi-squared the summation will be performed across every point in the data, so in effect the difference in the model fit and the data will be calculated for every array value.
+
+The equation for the chi-squared test can be seen in equation \ref{eq:10} below:
+
+\begin{equation}\label{eq:10}
+{\chi}^2 = \frac{1}{N}\sum_{i=1}^{N} \frac{(F_i - F_m)^2}{\sigma^2}
+\end{equation}
+
+where F\textsubscript{i} corresponds to the flux values of the original data, and F\textsubscript{m} is the flux predicted by the model produced in Fig. \ref{fig:8}. The variance of the data about its mean is denoted by the symbol $\sigma^2$. The way the model was produced, which as noted earlier used corresponding values of time/phase in the form of an array means that for the best-fitting model, the values of the model must be as close as possible to the values in the data. Hence a model fit that is consistently within the noise levels of the data, and accurately represents the F\textsubscript{i} will have a \( \chi \)\textsuperscript{2} value which is less than 1. A model fit was created and subsequently this process was repeated several times to achieve an improved model for the data, which enables us to obtain a minimum \( \chi \)\textsuperscript{2} value.
+
+The following figure displays this finished result:
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.75\linewidth]{Image8}
+\caption{Kepler planet from Fig. \ref{fig:4} fitted with a model. Notable features are a horizontal line at flux values of 0, showing the noise of the signal outside the transit is even, but significant in magnitude. Also note at depth of transit, the model is centered, however computer automation could improve the model and hence improve \( \chi \)\textsuperscript{2} value.}
+\label{fig:8}
+\end{figure}
+
+This model was produced by using best estimates for the various key features such as depth of transit etc. and was done by eye, similar in practise to the method used in section \ref{sec1} which was used to determine the planetary parameters. With this there were some drawbacks that limited the ability to quickly analyse many planets, as it is fairly tedious to note down these parameters by hand and perform the calculation for \( \chi \)\textsuperscript{2}. Therefore it was suggested to automate this process which has multiple benefits including increasing the speed at which an analysis can be performed, as well producing a better fit to the data which will be described in detail in the following section.
+
+\subsection{Automating Chi-squared}
+
+The reasons being discussed why this was performed have been mentioned so here are some examples of the difference it can make to optimising the chi-squared value. The diagrams below illustrate the difference a change in the flux depth can make to the model, by changing the values used in the calculation for the model.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.75\linewidth]{Image9}
+\caption{.}
+\label{fig:9}
+\end{figure}
+
+This first figure assumes a very deep transit and the model fit corresponds to a point at the lowest possible value for flux of the transit, likely noise.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.75\linewidth]{Image10}
+\caption{.}
+\label{fig:10}
+\end{figure}
+\newpage
+Meanwhile this figure shows us what the model would look like when fitted with a smaller depth of transit of \textasciitilde 0.007 as seen from the flux axis.
+
+These two approaches to creating the model will produce different values of \( \chi \)\textsuperscript{2} and the aim of the automation of \( \chi \)\textsuperscript{2} is to produce the lowest possible value. Hence the same process that was used to produce Figures \ref{fig:9} and \ref{fig:10} was used to minimise \( \chi \)\textsuperscript{2}. The depth
+
+The diagram below shows us the points we are varying\footnote[2]{Diagram taken from http://exoplanets.co/extrasolar-planets/what-is-the-transit-method.html}. Point 1 shows the ingress start time, the point at which the orbiting planet has reached the "lip" of the star. From 1 to 2 there is a transition period which was modelled as a slope with a gradient and is shown by the star passing across the edge of the star before reaching point 2, the planet is inside the body of the star. This physical phenomenon is then reversed for points 3 and 4, which represent the egress start and end times respectively. By changing the values of points 1-4 we were able to modify the model fit and hence the value of \( \chi \)\textsuperscript{2}.
+\newpage
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.9\linewidth]{Image11}
+\caption{Graph showing key points of interest of the physical movement of an orbiting planet across its host star.}
+\label{fig:11}
+\end{figure}
+
+The code that allowed us to modify our model of planetary transit can be seen in Fig. \ref{fig:12} below.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.9\linewidth]{Image12}
+\caption{Python code demonstrating the "nested loop" that was used to minimise \( \chi \)\textsuperscript{2}. }
+\label{fig:12}
+\end{figure}
+
+This is a nested loop of "for" loops and works in the same way as seen in Fig. \ref{fig:7} except with the added condition that the code will run and check each point, for example the ingress start time, and calculate new model values in a range of values according to what was specified in the list.
+
+To explain this in detail, below in Fig. \ref{fig:13} shows the list of 5 values less than, and 5 values greater than each point in the transit.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.9\linewidth]{Image13}
+\caption{}
+\label{fig:13}
+\end{figure}
+
+As you can see the MidDepth corresponds to the depth of the transit which was -0.00912595. Then a a list was created for this depth and values of MidDepth $\pm1-5\%$ were calculated. This was repeated for the ingress start time and the egress end time. Values of $\pm1-5\%$ were chosen however this was changed to fine tune the value of \( \chi \)\textsuperscript{2}. The smaller the change in values of these key points, the smaller the change in \( \chi \)\textsuperscript{2}. We can see in Fig. \ref{fig:12} that the nested loop means that for each loop 11 values of \( \chi \)\textsuperscript{2} will be calculated, therefore the total number of values of \( \chi \)\textsuperscript{2} will be 11x11x11 or 1331 values. In selecting the best fit for each loop, and repeating for every for loop the value of \( \chi \)\textsuperscript{2} was quickly reduced.
+
+Finally the smallest \( \chi \)\textsuperscript{2} value was selected and printed to the console.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.9\linewidth]{Image14}
+\caption{}
+\label{fig:14}
+\end{figure}
+
+\subsection{Further Independent Research}
+Future research into deeper areas of this project, which is likely to be on a larger group of systems.
+So this will be on what types of planets are most common etc, is there a orbital period that is common among orbiting planets.
+In other words is there resonant frequencies in other systems as we see in ours?
+
+\section{Discussion}
+\label{sec2}
+another problem is using small planets, ie size of planet is comparable to noise level- talk about noise- reductions in nasa data maybe.
+The method of analysing light curves has been described in detail however there are a few considerations made in this report to simplify the problem. One of these is the limb darkening effect
+
+One issue when analysing light curves from exoplanets is that the range of planets used had to be very specific. The radius of the planet is one such parameter that needed to be within the range between 2-16 R\textsubscript{Earth} in order to fully analyse its light curve. This is because if the planet has a radius smaller than 2R\textsubscript{Earth}, then it is difficult to separate the actual data of the planet passing its star, with the background noise from either the host star itself or nearby neighbours. In other words, in the case of smaller planets the signal-to-noise ratio is too high and hence an accurate calculation of its orbital period, and other such parameters is almost impossible. Similarly with planets larger than \textasciitilde 16R\textsubscript{Earth} there is a higher likelihood that these are false positives and therefore not real planetary candidates for a few reasons. They may be in fact other small stars such as those found in a binary star system or indeed a multi-planet system, mimicking the observations normally found for a single-planet system, which we were focusing on.
+\section{Results}
+
+\subsection{ideas for this section}
+What results will I aim to achieve? Graphs, tables, conclusions to reach about frequency of occurance of specific systems etc. Referring to section \ref{sec1} on page \pageref{sec1}
+
+\subsection{Initial Planets}
+\label{sec3}
+
+The intial objective of this project was to analyse a small group of planets using detrended light curves from the Kepler mission. From this analysis a set of parameters were obtained for each planet and these can be seen in Table \ref{tab:1} on page \pageref{tab:1}. The planet's are known as "Hot Jupiters", an example of this is Kepler-41 as confirmed by (Quintana et al. 2013) using high precision photometry to determine it as a giant planet in a 1.86 day orbit. Their findings also provided measurements on the planet's mass, size, and temperature which, along with many other discoveries made, will be used to analyse over thirty planets in section \ref{sec:5}.
+
+\newpage
+\begin{table}[h!]
+\captionof{table}{Set of Parameters from the analysis of Kepler light curves files. As you can see the sample of planets share similar characteristics. Note: Semi-major axes are small- less than 0.1 AU and R\textsubscript{p} large, with none less than 2 R\textsubscript{Earth}, suggesting these belong to a category of exoplanets known as "Hot Jupiters" as they orbit close to their host star, have large radii and are found to often be composed of gases.}
+\label{tab:1}
+\centering
+%\resizebox{\textwidth}{!}{%
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{r*{5}{c}}
+\toprule
+& \multicolumn{5}{c}{Planet Parameters} \\
+\cmidrule(lr){2-6}
+KeplerID & Planet Radius(R\textsubscript{Earth}) & Orbital Period(Days) & Semi-major Axis(AU) & Transit Impact Parameter(R\textsubscript{star}) & Inclination($\degree$) \\
+\midrule
+KIC006922244 & 15.1321370431 & 3.5224 & 0.0472240393756 & 0.663573356224 & 84.5607815916 \\
+KIC002571238 & 2.35767561318 & 9.287 & 0.083202505241 & 0.2039587288 & 89.4691526542 \\
+KIC005881688 & 6.99241815478 & 4.1905 & 0.0534347471694 & 0.559894522055 & 86.6599821864 \\
+KIC011853905 & 8.96268982548 & 3.21375 & 0.0438727885243 & 0.306811234761 & 87.1431556511 \\
+KIC007950644 & 10.4767427703 & 10.2905 & 0.0934546203456 & 0.4287603097 & 88.8022859031 \\
+KIC008359498 & 11.5605082151 & 3.578875 & 0.0450036444938 & 0.314594167064 & 88.1488112422 \\
+KIC010418224 & 14.6049269581 & 6.87301 & 0.0812384969765 & 0.634548315916 & 85.4615815156 \\
+KIC009631995 & 13.5633193649 & 7.89096 & 0.0794156235964 & 0.941976871548 & 86.1234456409 \\
+\bottomrule
+\end{tabular}
+%\caption{Here is a caption}\label{tlc}
+\end{adjustbox}
+\end{table}
+
+As previously mentioned the planets seen in the table above can be categorised as "Hot Jupiters", to explain why this is the case and why this is useful for us we must first discuss this means. There are some common properties, although not officially supported, have been suggested by the likes of (Winn et al. 2010) such as them having large masses and short orbital periods, 0.36-11.8 R\textsubscript{Jupiter} and 1.3-111 Earth days respectively. Other characteristics include low ecentricities caused by perturbations from nearby stars or tidal forces (Fabrycky and Tremaine 2009) and low densities such as the example of TrES-4 which has a density of $\rho = 0.222 \pm 0.045 g cm^-3$ (Mandushev et al. 2018) and is the lowest of all known exoplanets with measured radii and masses at the time of its discovery. Hot Jupiters also dominated early exoplanet discovery since they are so large relative to Earth and orbit close to their host star, this means that they are much easier to detect than other smaller planets. This is because, using the transit method, they produce a light curve that distinguishes itself from other planets as seen in Fig. \ref{fig:4}, since it will have a larger "dip" than smaller, Earth-like planets.
+
+Looking at Table \ref{tab:1} we can see the radius of these planets ranges between 2-16 R\textsubscript{Earth} which encompasses the radius of Jupiter which is \textasciitilde 11.21 R\textsubscript{Earth}\footnote[1]{Data taken from NASA Planetary Fact Sheet. https://nssdc.gsfc.nasa.gov/planetary/factsheet/}. With 7 out of the 8 having radii $\textasciitilde 7-15 R\textsubscript{Earth}$, these can be considered Jupiter-like in radius. In terms of orbital period there is some diversity however all 8 exoplanets have a period of between $3.5-10.3$ days. Therefore following on from this they share similar ranges in \textit{a}, the semi-major axis, which is some evidence for these exoplanets have orbits that are similar to each other. Without further analysis we cannot say for certain their orbits are same but a safe assumption is that we are considering them to have relatively circular orbits. This is based on the research from (Fabrycky et al. 2007) who found that hot jupiters have circular orbits due to the perturbations from nearby stars or by tidal forces which is due to the stronger gravitational field surrounding these large planets.
+
+Transit impact parameter and inclination comparisons
+
+With the planetary radius calculated a quick analysis of densities was undertaken, using the information about their mass from \footnote[3]{https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=planets}.
+
+
+
+
+
+\subsection{Expanded Search}\label{sec:5}
+
+Moving on from the first group of planets, an analysis was undertaken to investigate whether there are any correlations in the parameters of exoplanets. This involved analysing data downloaded from the NASA exoplanet archive, in the form of detrended light curves. The parameters that were chosen to be analysed were radius and mass, as we were interested to look into the distribution of planets and attempt to establish the occurance or lack thereof of a linear relationship between the two. As seen in our own solar system the mass distribution is skewed heavily towards the gas giants, namely; Jupiter, Saturn, Uranus and Neptune. These planets make up \textasciitilde 99.56\% of the mass of the planets in our solar system\footnote[1]{Data taken from NASA Planetary Fact Sheet. https://nssdc.gsfc.nasa.gov/planetary/factsheet/}.
+
+
+Firstly it must be noted that the planets that were examined had Planetary Radii in the range of 2-15 Earth Radii, as outside these ranges one encounters problems as discussed in section \ref{sec2} on page \pageref {sec2}.
+
+The data, which can be seen in Table \ref{tab:2} on page \pageref{tab:2}
+
+\begin{table}[h!]
+\captionof{table}{Parameters from the analysis of Confirmed Planets from the NASA exoplanet archive.}
+\label{tab:2}
+\centering
+%\resizebox{\textwidth}{!}{%
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{r*{5}{c}}
+\toprule
+& \multicolumn{5}{c}{Planet Parameters} \\
+\cmidrule(lr){2-6}
+KeplerID & Planet Radius(R\textsubscript{Earth}) & Orbital Period(Days) & Semi-major Axis(AU) & Transit Impact Parameter(R\textsubscript{star}) & Inclination($\degree$) \\
+\midrule
+Kepler39 & 15.5947758801 & 21.0835 & 0.152427730296 & 0.650686421163 & 88.2690930293 \\
+Kepler433 & 17.1320292524 & 5.33408 & 0.0679096390915 & 0.412733743965 & 86.3176411982 \\
+Kepler-423 & 14.0509316908 & 2.6843285 & 0.0358805389773 & 0.298788848828 & 87.8801486425 \\
+Kepler-427 & 14.6117775178 & 10.290994 & 0.0902984250017 & 0.716064102176 & 87.1307655182\\
+Kepler-43 & 13.7501133302 & 3.0240949 & 0.0452628559466 & 0.605865659357 & 84.9010908567 \\
+Kepler-40 & 14.2547204742 & 6.87349 & 0.0802030194559 & 0.288668367057 & 87.9457267498 \\
+Kepler-422 & 13.8445752196 & 7.8914483 & 0.0814463663688 & 0.311662149351 & 88.728716072\\
+Kepler-14 & 10.6195810711 & 6.790123 & 0.0807776427577 & 0.138483607089 & 89.0593551612 \\
+Kepler-434 & 9.39749876363 & 12.87471 & 0.11505278636 & 0.974836926785 & 86.8659210067\\
+Kepler-44 & 12.3692908152 & 3.2467293 & 0.0444978825673 & 0.851218771188 & 83.0644869822 \\
+Kepler-426 & 12.0584789761 & 3.21751883 & 0.0415296938337 & 0.586439310467 & 86.5174329034 \\
+Kepler-428 & 13.1435237004 & 3.52563254 & 0.0434214312933 & 0.546243757935 & 87.3028105304 \\
+Kepler-75 & 12.3471780098 & 8.8849116 & 0.0817551007811 & 0.881872634024 & 87.4272035751 \\
+Kepler-425 & 11.3479326053 & 3.79701816 & 0.0465707819471 & 0.362997388155 & 88.2038787293 \\
+Kepler-77 & 11.5959589936 & 3.57878087 & 0.0450193942939 & 0.335669967363 & 88.0220691071 \\
+Kepler-74 & 11.3198900363 & 7.34074 & 0.0801293013724 & 0.544583963728 & 87.9603282588\\
+Kepler-45 & 11.5320395977 & 2.455239 & 0.0293397959202 & 0.494277891953 & 87.5169183697 \\
+Kepler-15 & 11.469562728 & 4.942782 & 0.0576511797257 & 0.458214797394 & 87.8872491948\\
+Kepler-63 & 6.29826130133 & 9.4341505 & 0.0871173200791 & 0.535355007763 & 88.5165082356 \\
+Kepler-1656 & 5.55593488146 & 31.578659 & 0.198461845486 & 0.957033167224 & 88.5787802509 \\
+Kepler-4 & 4.35537560627 & 3.21346 & 0.0453602414483 & 0.759820311464 & 83.3117102777 \\
+Kepler-95 & 3.51661850109 & 11.5231 & 0.102646719755 & 0.691827157013 & 87.4532104406 \\
+Kepler-96 & 2.84702695234 & 16.2385 & 0.125965080138 & 0.482773699341 & 88.9526584562 \\
+
+\bottomrule
+\end{tabular}
+%\caption{Here is a caption}\label{tlc}
+\end{adjustbox}
+\end{table}
+
+
+With the data collected from the NASA archive, together with the parameters calculated in section \ref{sec3} we were able to construct a Mass-Radius plot that demonstrates the relationship between these two parameters and helps us to understand how common certain types of exoplanets are and gives a brief insight into the composition of such planets.
+
+\subsection{Comparing Results with Exoplanet Archive}
+HOW DO I COMPARE THEM- TABLES?
+\section{Planned Future Work}
+
+\subsection{Coding Required}
+I am still in the proc
+of completing the coding required to finish this project. I need to complete the minimisation of chi-squared using nested loops as mentioned in
+After this I can look into further research as mentioned in section \ref{sec3} on page \pageref{sec3}.
+
+
+\subsection{Writeup of report}
+Once the coding if finished I can start collating my data and to come up with a more detailed plan on how to write my report.
+This should include method, findings, conclusion and a look to broader findings in the scientific community by such examples as comparing my results to other published articles.
+
+\subsection{Conclusion}
+During this project the methods of using Kepler mission data to analyse light curves were learned and applied to a variety of different planet systems. Some analysis was made into a small number of systems and primarily the focus was to find out (BLANK).
+Contains details of findings and the ease of use of using python to find out information about planets from kepler data files.
+
+\section{Bibliography}
+
+https://arxiv.org/abs/1706.09849
+
+https://arxiv.org/abs/1410.4199
+
+https://arxiv.org/abs/1802.09526
+
+[1] file:///C:/Users/Tom/Downloads/9783319274560-c1.pdf
+%Gillon, M., et al. 2007, A & A, in press (arXiv: 0705.2219)
+%Zapolsky, H. S., & Salpeter, E. E. 1969, ApJ, 158, 809
+
+
+
+\end{document}
